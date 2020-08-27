@@ -42,13 +42,7 @@ class MyApp(QMainWindow, axesMPL.Ui_MainWindow):
 
 
     # Funktionen, die in ein extra Modul gehören
-
-    def read_csv(self):
-        path = self.txt_path.text()
-        file = os.path.basename(path)
-        self.data = pd.read_csv(path)
-        return self.data
-
+    
     def test_if_string(self):
         with open(self.path, 'rb', 0) as file, \
         mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as s:
@@ -62,6 +56,7 @@ class MyApp(QMainWindow, axesMPL.Ui_MainWindow):
                 # self.status_line.setStyleSheet("color: rgb(0, 0, 0);")
                 self.but_init_data.setEnabled(True)
                 self.but_QuickPlot.setEnabled(True)
+
 
     def trim_csv(self):
         with open(self.path, 'r') as file:
