@@ -10,8 +10,8 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 import sys  # We need sys so that we can pass argv to QApplication
 import numpy as np
 import axesMPL
-from Lib import IBtoGCode_Lib as IBtoGCode
-from Lib import IBtoGCode_Helper as IBtoGCode
+from Lib import IBtoGCode_Lib
+from Lib import IBtoGCode_Helper
 from Lib import dataObject as dOj
 
 
@@ -42,7 +42,7 @@ class MyApp(QMainWindow, axesMPL.Ui_MainWindow):
 
     # Funktionen, die in ein extra Modul gehören
     def test_if_string(self):
-        if IBtoGCode.test_if_string_helper(self.data):
+        if IBtoGCode_Helper.test_if_string_helper(self.data):
             self.statusBar().showMessage('Datei enthält ungültige Zeichen!')
             # self.status_line.setStyleSheet("color: rgb(181, 18, 62);")
             self.but_trim_csv.setEnabled(True)
@@ -53,12 +53,12 @@ class MyApp(QMainWindow, axesMPL.Ui_MainWindow):
             self.but_QuickPlot.setEnabled(True)
 
     def trim_csv(self):
-        IBtoGCode.trim_csv_helper(self.data)
+        IBtoGCode_Helper.trim_csv_helper(self.data)
         self.proc_path()
         self.test_if_string()
 
     def init_data(self):
-        df = IBtoGCode.init_data_helper(self.data.pfad, int(self.par_ang.text()))
+        df = IBtoGCode_Helper.init_data_helper(self.data.pfad, int(self.par_ang.text()))
         self.data.set_data_frame(df)
 
         self.but_calc_ib.setEnabled(True)
@@ -68,7 +68,7 @@ class MyApp(QMainWindow, axesMPL.Ui_MainWindow):
     def out_to_np(self):
         laengen = [self.par_slp_out_0_1.text(), self.par_slp_out_0_2.text(), self.par_slp_out_0_3.text()]
         werte = [self.par_slp_out_1_1.text(), self.par_slp_out_1_2.text(), self.par_slp_out_1_3.text()]
-        return IBtoGCode.out_to_np_helper(laengen, werte)
+        return IBtoGCode_Helper.out_to_np_helper(laengen, werte)
 
     def calc_sq(self):
         df = getattr(self.data, "df")
@@ -92,11 +92,11 @@ class MyApp(QMainWindow, axesMPL.Ui_MainWindow):
         par_l_gk = self.par_l_gk.text()
         par_l_ns = self.par_l_ns.text()
         par_vs_trans = self.par_vs_trans.text()
-        vs = IBtoGCode.get_vs(df, self.rb_vs_const.isChecked(), self.rb_vs_step.isChecked(),
+        vs = IBtoGCode_Lib.get_vs(df, self.rb_vs_const.isChecked(), self.rb_vs_step.isChecked(),
                               par_vs, par_vs_gk, par_vs_ns, par_slp_in, par_l_gk,
                               par_l_ns, par_vs_trans)
 
-        df = IBtoGCode.calc_sq_helper(df, i_0, foc_of, foc_ruhe, vs, slp_in, slp_out, ang, v_s_slope, di)
+        df = IBtoGCode_Helper.calc_sq_helper(df, i_0, foc_of, foc_ruhe, vs, slp_in, slp_out, ang, v_s_slope, di)
 
         self.data.set_data_frame(df)
         self.but_filter_data.setEnabled(True)
@@ -105,7 +105,7 @@ class MyApp(QMainWindow, axesMPL.Ui_MainWindow):
     def filter_data(self):
         df = getattr(self.data, "df")
         # --- Filterung der Daten ---
-        df = IBtoGCode.filter_data_helper(self.filt_met_med.isChecked(), self.par_n_med.text(),
+        df = IBtoGCode_Helper.filter_data_helper(self.filt_met_med.isChecked(), self.par_n_med.text(),
                                           self.filt_met_sav.isChecked(), self.par_n_sav.text(), self.par_p_sav.text(),
                                           df)
         self.but_create_cnc.setEnabled(True)
@@ -115,7 +115,7 @@ class MyApp(QMainWindow, axesMPL.Ui_MainWindow):
     def create_cnc(self):
         ang = float(self.par_ang.text())
         d_ang = float(self.par_d_ang.text())
-        cnc = IBtoGCode.create_cnc_helper(ang, d_ang, getattr(self.data, "df"))
+        cnc = IBtoGCode_Helper.create_cnc_helper(ang, d_ang, getattr(self.data, "df"))
         self.data.set_cnc(cnc)
         self.but_save_data.setEnabled(True)
         return cnc
@@ -139,7 +139,7 @@ class MyApp(QMainWindow, axesMPL.Ui_MainWindow):
         self.txt_outfolder.setText(out_file)
 
     def proc_path(self):
-        file, versuch = IBtoGCode.proc_path_helper(self.data)
+        file, versuch = IBtoGCode_Helper.proc_path_helper(self.data)
         self.txt_path.setText(self.data.pfad)
         self.txt_file.setText(file)
         self.txt_versuch.setText(versuch)
@@ -157,10 +157,10 @@ class MyApp(QMainWindow, axesMPL.Ui_MainWindow):
         csv = self.cb_save_csv.isChecked()
         if csv and cnc:
             self.save_cnc(self.data.versuch, self.data.directory, self.data.cnc)
-            IBtoGCode.save_csv(getattr(self.data, "df"), getattr(self.data, "versuch"), getattr(self.data, "directory"))
+            IBtoGCode_Lib.save_csv(getattr(self.data, "df"), getattr(self.data, "versuch"), getattr(self.data, "directory"))
             self.statusBar().showMessage('CSV und CNC erfolgreich gesichert.', 2000)
         elif csv:
-            IBtoGCode.save_csv(getattr(self.data, "df"), getattr(self.data, "versuch"), getattr(self.data, "directory"))
+            IBtoGCode_Lib.save_csv(getattr(self.data, "df"), getattr(self.data, "versuch"), getattr(self.data, "directory"))
             self.statusBar().showMessage('CSV erfolgreich gesichert.', 2000)
         elif cnc:
             self.save_cnc(getattr(self.data, "versuch"), getattr(self.data, "directory"), getattr(self.data, "cnc"))
@@ -169,13 +169,13 @@ class MyApp(QMainWindow, axesMPL.Ui_MainWindow):
             self.statusBar().showMessage('Keine Daten gesichert.', 2000)
 
     def save_cnc(self, versuch, direction, cnc):
-        pos_slope = int(IBtoGCode.get_slope_pos(getattr(self.data, "slp_out"))[0])
+        pos_slope = int(IBtoGCode_Lib.get_slope_pos(getattr(self.data, "slp_out"))[0])
         txt_out_folder = self.txt_outfolder.text()
         ang = int(self.par_ang.text())
         d_ang = float(self.par_d_ang.text())
         slp_in = int(self.par_slp_in.text())
 
-        IBtoGCode.save_cnc_helper(direction, versuch, txt_out_folder, d_ang, ang, slp_in, pos_slope, cnc)
+        IBtoGCode_Helper.save_cnc_helper(direction, versuch, txt_out_folder, d_ang, ang, slp_in, pos_slope, cnc)
 
     def enable_butt(self):
         self.par_n_med.setEnabled(False)

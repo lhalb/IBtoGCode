@@ -115,7 +115,10 @@ def filter_data_helper(met_med_checked: float, n_med_text: str, met_sav_checked:
         n_sav = int(n_sav_text)
         poly_sav = int(p_sav_text)
         # Savgol-Filter über 401 Werte mit Polynom 5. Grades
-        df['IB-korr'] = savgol_filter(df['IB'], n_sav, poly_sav)
+        try:
+            df['IB-korr'] = savgol_filter(df['IB'], n_sav, poly_sav)
+        except np.linalg.LinAlgError:
+            df['IB-korr'] = savgol_filter(df['IB'], n_sav, poly_sav)
     else:
         print('Keine/falsche Filtermethode angegeben')
     return df
@@ -178,10 +181,8 @@ def calc_sq_helper(df, i_0, foc_of, foc_ruhe, vs, slp_in, slp_out, ang, v_s_slop
 
     for i in range(len(zaehl2)):
         if (len(zaehl2) == 1) or (i == len(zaehl2)):
-            print('ich mache das')
             sq.iloc[zaehl2[i]:, 1] = np.linspace(sq_out[i], sq_out[i + 1], anz_out[i])
         else:
-            print('nein, das mach ich')
             sq.iloc[zaehl2[i]:zaehl2[i + 1], 1] = np.linspace(sq_out[i], sq_out[i + 1], anz_out[i])
 
     # SL
